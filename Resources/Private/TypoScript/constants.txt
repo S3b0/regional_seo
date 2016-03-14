@@ -1,0 +1,24 @@
+plugin.tx_regionalseo {
+	view {
+		# cat=Regional SEO/file; type=string; label=Path to template root (FE)
+		templateRootPath = EXT:regional_seo/Resources/Private/Templates/
+		# cat=Regional SEO/file; type=string; label=Path to template partials (FE)
+		partialRootPath = EXT:regional_seo/Resources/Private/Partials/
+		# cat=Regional SEO/file; type=string; label=Path to template layouts (FE)
+		layoutRootPath = EXT:regional_seo/Resources/Private/Layouts/
+	}
+	persistence {
+		# cat=Regional SEO//a; type=string; label=Default storage PID
+		storagePid =
+	}
+	settings {
+		#cat=Regional SEO//10;type=int+;label=Website root: Page uid of website/domain root site
+		domainRoot = 0
+		#cat=Regional SEO//20;type=string;label=Default Language: ISO code of default language
+		defaultIsoLanguage = en
+		#cat=Regional SEO//30;type=boolean;label=Canonical Tag: Adds a canonical tag if set
+		canonical = 1
+		#cat=Regional SEO//40;type=string;label=Include Parameters: Parameters to keep in URL (comma-separated list,regexp)
+		includeParams =
+	}
+}

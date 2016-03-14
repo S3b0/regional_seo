@@ -1,0 +1,35 @@
+plugin.tx_regionalseo_add {
+	view {
+		templateRootPaths.0 = {$plugin.tx_regionalseo.view.templateRootPath}
+		partialRootPaths.0 = {$plugin.tx_regionalseo.view.partialRootPath}
+		layoutRootPaths.0 = {$plugin.tx_regionalseo.view.layoutRootPath}
+	}
+
+	persistence {
+		storagePid = {$plugin.tx_regionalseo.persistence.storagePid}
+	}
+
+	settings {
+		domainRoot = {$plugin.tx_regionalseo.settings.domainRoot}
+		defaultIsoLanguage = {$plugin.tx_regionalseo.settings.defaultIsoLanguage}
+		canonical = {$plugin.tx_regionalseo.settings.canonical}
+		includeParams = {$plugin.tx_regionalseo.settings.includeParams}
+	}
+}
+
+page.headerData.1457688079 = USER
+page.headerData.1457688079 {
+	userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+	extensionName = RegionalSeo
+	pluginName = Add
+	vendorName = S3b0
+}
+
+# If you got a page, linked to other languages' landing page(s) with differing pid, you might use the following feature
+# Add alternate targets in the following way:
+#[globalVar = TSFE:id = X]
+#plugin.tx_regionalseo_add.settings.alternateTarget {
+#	de = Y
+#	fr = Y
+#}
+#[global]

@@ -1,0 +1,14 @@
+<!-- regional SEO -->
+<f:if condition="{data.xDefault}">
+	<link rel="alternate" hreflang="x-default" href="{data.xDefault}" />
+</f:if>
+
+<f:if condition="{data.hrefLang}">
+	<f:for each="{data.hrefLang}" as="link" key="hrefLang">
+		<link rel="alternate" hreflang="{hrefLang}" href="{link}" />
+	</f:for>
+</f:if>
+
+<f:if condition="{data.canonical}">
+	<link rel="canonical" href="{data.canonical}" />
+</f:if>
