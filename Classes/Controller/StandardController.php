@@ -40,6 +40,12 @@ class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControl
     protected $languageRepository;
 
     /**
+     * @var \TYPO3\CMS\Frontend\Page\PageRepository
+     * @inject
+     */
+    protected $pageRepository;
+
+    /**
      * @var string
      */
     protected $defaultIsoLanguage = 'en';
@@ -57,19 +63,19 @@ class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControl
         $arguments = [];
 
         /** Add arguments to keep in urls */
-        if ($this->settings['includeParams'] && $getVars) {
+        if ($this->settings[ 'includeParams' ] && $getVars) {
             /** @var string $regexp */
-            foreach (GeneralUtility::trimExplode(',', $this->settings['includeParams']) as $regexp) {
+            foreach (GeneralUtility::trimExplode(',', $this->settings[ 'includeParams' ]) as $regexp) {
                 foreach ($getVars as $key => $value) {
                     if (preg_match("/{$regexp}/i", $key)) {
-                        $arguments[$key] = $value;
+                        $arguments[ $key ] = $value;
                     }
                 }
             }
         }
 
         /** Add initial language parameter to arguments */
-        $arguments['L'] = 0;
+        $arguments[ 'L' ] = 0;
 
         /** @var array $addHrefLang */
         $addHrefLang = [
@@ -102,10 +108,12 @@ class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControl
                     continue;
                 }
                 /** Override initial language parameter */
-                $arguments['L'] = $language->getUid();
+                $arguments[ 'L' ] = $language->getUid();
                 /** Process existing alternate page languages */
                 if (is_array($alternatePageLanguages) && in_array($language->getUid(), $alternatePageLanguages)) {
-                    $addHrefLang[ $language->getHrefLang() ] = $this->uriBuilder->reset()->setArguments($arguments)->build();
+                    $addHrefLang[ $language->getHrefLang() ] = $this->uriBuilder->reset()
+                        ->setArguments($arguments)
+                        ->build();
                 }
 
                 /** Override if alternate target is set (TypoScript) */
@@ -118,7 +126,7 @@ class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControl
         }
 
         if ($this->settings[ 'canonical' ]) {
-            $arguments['L'] = $this->getTyposcriptFrontendController()->sys_language_uid;
+            $arguments[ 'L' ] = $this->getTyposcriptFrontendController()->sys_language_uid;
             $addCanonical = $this->uriBuilder->reset()->setArguments($arguments)->build();
         } else {
             $addCanonical = null;
@@ -139,7 +147,7 @@ class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControl
         $result = $this->getDatabaseConnection()->exec_SELECTgetRows(
             'sys_language_uid',
             'pages_language_overlay',
-            'pid=' . (int)$this->getTyposcriptFrontendController()->id
+            'pid=' . (int)$this->getTyposcriptFrontendController()->id . $this->pageRepository->enableFields('pages_language_overlay')
         );
         if ($result) {
             array_walk($result, function(&$value) {
