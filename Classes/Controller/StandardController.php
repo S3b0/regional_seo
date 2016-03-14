@@ -40,12 +40,6 @@ class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControl
     protected $languageRepository;
 
     /**
-     * @var \TYPO3\CMS\Frontend\Page\PageRepository
-     * @inject
-     */
-    protected $pageRepository;
-
-    /**
      * @var string
      */
     protected $defaultIsoLanguage = 'en';

@@ -11,17 +11,17 @@
  ***************************************************************/
 
 $EM_CONF['regional_seo'] = array(
-	'title' => 'regional URLs',
+	'title' => 'Regional SEO',
 	'description' => 'Use hreflang for language and regional URLs (SEO)',
 	'category' => 'plugin',
 	'author' => 'Sebastian Iffland',
 	'author_email' => 'sebastian.iffland@ecom-ex.com',
 	'state' => 'beta',
 	'internal' => '',
-	'uploadfolder' => '0',
+	'uploadfolder' => false,
 	'createDirs' => '',
-	'clearCacheOnLoad' => 0,
-	'version' => '7.6.1',
+	'clearCacheOnLoad' => false,
+	'version' => '7.6.2',
 	'constraints' => array(
 		'depends' => array(
 			'typo3' => '7.6.0-7.6.99',
