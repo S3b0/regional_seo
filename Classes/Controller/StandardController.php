@@ -89,6 +89,11 @@ class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControl
             )->setArguments($arguments)->build();
         }
 
+        /** Reset hrefLang array, if default language is active */
+        if ($this->getTyposcriptFrontendController()->sys_language_uid < 1) {
+            $addHrefLang = [];
+        }
+
         /** @var array|\TYPO3\CMS\Extbase\Persistence\QueryResultInterface $languages */
         if ($languages = $this->languageRepository->findAll()) {
             /** @var array|null $alternatePageLanguages */
