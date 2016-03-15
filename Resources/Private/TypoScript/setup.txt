@@ -14,6 +14,7 @@ plugin.tx_regionalseo_add {
 		defaultIsoLanguage = {$plugin.tx_regionalseo.settings.defaultIsoLanguage}
 		canonical = {$plugin.tx_regionalseo.settings.canonical}
 		includeParams = {$plugin.tx_regionalseo.settings.includeParams}
+		handleLanguages = {$plugin.tx_regionalseo.settings.handleLanguages}
 	}
 }
 

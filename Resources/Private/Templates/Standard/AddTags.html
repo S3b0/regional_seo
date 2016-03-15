@@ -4,11 +4,11 @@
 </f:if>
 
 <f:if condition="{data.hrefLang}">
-	<f:for each="{data.hrefLang}" as="link" key="hrefLang">
-		<link rel="alternate" hreflang="{hrefLang}" href="{link}" />
+	<f:for each="{data.hrefLang}" as="config" key="">
+		<link rel="alternate" hreflang="{config.hreflang}" href="{f:uri.page(pageUid: config.pageUid, additionalParams: config.arguments)}" />
 	</f:for>
 </f:if>
 
 <f:if condition="{data.canonical}">
-	<link rel="canonical" href="{data.canonical}" />
+	<link rel="canonical" href="{f:uri.page(additionalParams: data.canonical.arguments)}" />
 </f:if>

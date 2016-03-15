@@ -33,6 +33,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
 {
 
+    const HIDE_DEFAULT_TRANSLATION    = 1;
+    const HIDE_PAGE_IF_NO_TRANSLATION = 2;
+
     /**
      * @var \S3b0\RegionalSeo\Domain\Repository\LanguageRepository
      * @inject
@@ -59,7 +62,8 @@ class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControl
     {
         $this->setDefaultIsoLanguage();
         $getVars = GeneralUtility::_GET();
-        $addXDefault = $this->getTyposcriptFrontendController()->id === (int)$this->settings[ 'domainRoot' ];
+        $xDefault = $this->getTyposcriptFrontendController()->id === (int)$this->settings[ 'domainRoot' ];
+        $pageI18nConfiguration = (int)$this->getTyposcriptFrontendController()->page[ 'l18n_cfg' ];
         $arguments = [];
 
         /** Add arguments to keep in urls */
@@ -77,21 +81,25 @@ class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControl
         /** Add initial language parameter to arguments */
         $arguments[ 'L' ] = 0;
 
-        /** @var array $addHrefLang */
-        $addHrefLang = [
-            $this->defaultIsoLanguage => $this->uriBuilder->reset()->setArguments($arguments)->build()
+        /** @var array $hrefLangCollection */
+        $hrefLangCollection[ 0 ] = [
+            'hreflang'  => $this->defaultIsoLanguage,
+            'arguments' => $arguments,
+            'pageUid'   => null
         ];
         /** Override if alternate target is set by typoscript */
         if (is_array($this->settings[ 'alternateTarget' ]) && array_key_exists($this->defaultIsoLanguage, $this->settings[ 'alternateTarget' ])) {
-            $addXDefault = (int)$this->settings[ 'alternateTarget' ][ $this->defaultIsoLanguage ] === (int)$this->settings[ 'domainRoot' ];
-            $addHrefLang[ $this->defaultIsoLanguage ] = $this->uriBuilder->reset()->setTargetPageUid(
-                $this->settings[ 'alternateTarget' ][ $this->defaultIsoLanguage ]
-            )->setArguments($arguments)->build();
+            $xDefault = (int)$this->settings[ 'alternateTarget' ][ $this->defaultIsoLanguage ] === (int)$this->settings[ 'domainRoot' ];
+            $hrefLangCollection[ 0 ] = [
+                'hreflang'  => $this->defaultIsoLanguage,
+                'arguments' => $arguments,
+                'pageUid'   => $this->settings[ 'alternateTarget' ][ $this->defaultIsoLanguage ]
+            ];
         }
 
         /** Reset hrefLang array, if default language is active */
-        if ($this->getTyposcriptFrontendController()->sys_language_uid < 1) {
-            $addHrefLang = [];
+        if ($this->getTyposcriptFrontendController()->sys_language_uid < 1 || ($pageI18nConfiguration & self::HIDE_DEFAULT_TRANSLATION)) {
+            $hrefLangCollection = [];
         }
 
         /** @var array|\TYPO3\CMS\Extbase\Persistence\QueryResultInterface $languages */
@@ -104,38 +112,62 @@ class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControl
              * @var \S3b0\RegionalSeo\Domain\Model\Language $language
              */
             foreach ($languages as $offset => $language) {
+                /** Skip for current language */
                 if ($language->getUid() === $this->getTyposcriptFrontendController()->sys_language_uid) {
                     continue;
                 }
+
                 /** Override initial language parameter */
                 $arguments[ 'L' ] = $language->getUid();
+                $processed = false;
+
                 /** Process existing alternate page languages */
                 if (is_array($alternatePageLanguages) && in_array($language->getUid(), $alternatePageLanguages)) {
-                    $addHrefLang[ $language->getHrefLang() ] = $this->uriBuilder->reset()
-                        ->setArguments($arguments)
-                        ->build();
+                    $hrefLangCollection[ $language->getUid() ] = [
+                        'hreflang'  => $language->getHrefLang(),
+                        'arguments' => $arguments,
+                        'pageUid'   => null
+                    ];
+                    $processed = true;
                 }
 
                 /** Override if alternate target is set (TypoScript) */
                 if (is_array($this->settings[ 'alternateTarget' ]) && array_key_exists($language->getHrefLang(), $this->settings[ 'alternateTarget' ])) {
-                    $addHrefLang[ $language->getHrefLang() ] = $this->uriBuilder->reset()->setTargetPageUid(
-                        $this->settings[ 'alternateTarget' ][ $language->getHrefLang() ]
-                    )->setArguments($arguments)->build();
+                    $hrefLangCollection[ $language->getUid() ] = [
+                        'hreflang'  => $language->getHrefLang(),
+                        'arguments' => $arguments,
+                        'pageUid'   => $this->settings[ 'alternateTarget' ][ $language->getHrefLang() ]
+                    ];
+                    $processed = true;
+                }
+
+                /** Proceed if page mode is NOT set to 'Hide page if no translation for current language exists' */
+                if ($this->settings[ 'handleLanguages' ] && !GeneralUtility::inList($this->settings[ 'handleLanguages' ], $language->getUid())) {
+                    continue;
+                }
+
+                /** Process any language, that has NO pages_language_overlay record and/or alternateTarget */
+                if ($processed === false && ($pageI18nConfiguration & self::HIDE_PAGE_IF_NO_TRANSLATION) === 0) {
+                    $hrefLangCollection[ $language->getUid() ] = [
+                        'hreflang'  => $language->getHrefLang(),
+                        'arguments' => $arguments,
+                        'pageUid'   => null
+                    ];
                 }
             }
         }
 
         if ($this->settings[ 'canonical' ]) {
             $arguments[ 'L' ] = $this->getTyposcriptFrontendController()->sys_language_uid;
-            $addCanonical = $this->uriBuilder->reset()->setArguments($arguments)->build();
+            $canonical = ['arguments' => $arguments];
         } else {
-            $addCanonical = null;
+            $canonical = null;
         }
 
         $this->view->assign('data', [
-            'xDefault'  => $addXDefault ? $this->getTyposcriptFrontendController()->baseUrl : null,
-            'canonical' => $addCanonical,
-            'hrefLang'  => $addHrefLang
+            'xDefault'  => $xDefault ? $this->getTyposcriptFrontendController()->baseUrl : null,
+            'canonical' => $canonical,
+            'hrefLang'  => $hrefLangCollection
         ]);
     }
 
