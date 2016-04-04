@@ -98,9 +98,11 @@ class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControl
         }
 
         /** Reset hrefLang array, if default language is active */
+/**
         if ($this->getTyposcriptFrontendController()->sys_language_uid < 1 || ($pageI18nConfiguration & self::HIDE_DEFAULT_TRANSLATION)) {
             $hrefLangCollection = [];
         }
+*/
 
         /** @var array|\TYPO3\CMS\Extbase\Persistence\QueryResultInterface $languages */
         if ($languages = $this->languageRepository->findAll()) {
@@ -113,9 +115,11 @@ class StandardController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControl
              */
             foreach ($languages as $offset => $language) {
                 /** Skip for current language */
+/**
                 if ($language->getUid() === $this->getTyposcriptFrontendController()->sys_language_uid) {
                     continue;
                 }
+*/
 
                 /** Override initial language parameter */
                 $arguments[ 'L' ] = $language->getUid();
